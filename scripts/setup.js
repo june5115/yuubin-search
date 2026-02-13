@@ -93,14 +93,17 @@ async function setup() {
 
   console.log('🔄 データを解析中...');
   const lines = csvContent.split('\r\n');
-  const dataMap = new Map();
+  const seen = new Set();
+  const kana = {};
+  const grouped = {};
+  let count = 0;
 
   for (const line of lines) {
     if (!line.trim()) continue;
     const cols = parseCSVLine(line);
     if (cols.length < 9) continue;
 
-    const zip = cols[2];
+    const zipCode = cols[2];
     const pref = cols[6];
     const city = cols[7];
     let town = cols[8];
@@ -108,38 +111,30 @@ async function setup() {
     const cityKana = cols[4];
     let townKana = cols[5];
 
-    // 特殊な町域名を処理
-    if (town === '以下に掲載がない場合') {
-      town = '';
-      townKana = '';
-    }
-    if (town.includes('の次に番地がくる場合')) {
+    if (town === '以下に掲載がない場合' || town.includes('の次に番地がくる場合')) {
       town = '';
       townKana = '';
     }
 
-    const key = `${zip}-${pref}-${city}-${town}`;
-    if (!dataMap.has(key)) {
-      dataMap.set(key, {
-        z: zip,
-        p: pref,
-        c: city,
-        t: town,
-        pk: prefKana,
-        ck: cityKana,
-        tk: townKana,
-      });
-    }
+    const key = `${zipCode}-${pref}-${city}-${town}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    if (!kana[pref]) kana[pref] = prefKana;
+    if (!kana[city]) kana[city] = cityKana;
+
+    if (!grouped[pref]) grouped[pref] = {};
+    if (!grouped[pref][city]) grouped[pref][city] = [];
+    grouped[pref][city].push([town, townKana, zipCode]);
+    count++;
   }
 
-  const data = Array.from(dataMap.values());
-  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(data), 'utf-8');
-
-  // クリーンアップ
+  const output = { _k: kana, d: grouped };
+  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output), 'utf-8');
   fs.unlinkSync(ZIP_PATH);
 
-  console.log(`✅ 完了！ ${data.length} 件のデータを処理しました`);
-  console.log(`📁 出力先: ${OUTPUT_PATH}`);
+  const sizeMB = (fs.statSync(OUTPUT_PATH).size / 1024 / 1024).toFixed(2);
+  console.log(`✅ 完了！ ${count} 件 (${sizeMB} MB)`);
 }
 
 setup().catch((err) => {
