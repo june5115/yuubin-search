@@ -1,0 +1,19 @@
+{
+  "name": "yuubin-search",
+  "version": "1.0.0",
+  "description": "郵便番号検索アプリ - Japanese Postal Code Search",
+  "main": "server.js",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "start": "node server.js",
+    "desktop": "npx electron electron/main.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "iconv-lite": "^0.6.3",
+    "adm-zip": "^0.5.16"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}

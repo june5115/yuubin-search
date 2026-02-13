@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>〒 郵便番号検索</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header__mark">〒</div>
+      <h1 class="header__title">郵便番号検索</h1>
+      <p class="header__sub">POSTAL CODE SEARCH</p>
+    </header>
+
+    <nav class="mode-selector">
+      <button class="mode-btn mode-btn--active" data-mode="zip">
+        <span class="mode-btn__number">01</span>
+        <span class="mode-btn__label">郵便番号 → 住所</span>
+      </button>
+      <button class="mode-btn" data-mode="address">
+        <span class="mode-btn__number">02</span>
+        <span class="mode-btn__label">住所 → 郵便番号</span>
+      </button>
+    </nav>
+
+    <section class="search-box">
+      <div id="zip-mode" class="search-box__mode">
+        <label class="search-box__label" for="zip-input">郵便番号を入力 INPUT POSTAL CODE</label>
+        <input
+          class="search-box__input"
+          type="text"
+          id="zip-input"
+          placeholder="100-0001"
+          maxlength="8"
+          autocomplete="off"
+        >
+      </div>
+      <div id="address-mode" class="search-box__mode search-box__mode--hidden">
+        <label class="search-box__label" for="address-input">住所を入力 INPUT ADDRESS</label>
+        <input
+          class="search-box__input"
+          type="text"
+          id="address-input"
+          placeholder="東京都千代田区"
+          autocomplete="off"
+        >
+      </div>
+      <button class="search-btn" id="search-btn">
+        <span class="search-btn__text">検索</span>
+        <span class="search-btn__en">SEARCH</span>
+      </button>
+    </section>
+
+    <section class="results" id="results">
+      <div class="results__placeholder">
+        <span class="results__icon">↑</span>
+        <p>検索キーワードを入力してください</p>
+      </div>
+    </section>
+
+    <div class="status-bar" id="status-bar">
+      <span class="status-bar__dot"></span>
+      <span class="status-bar__text">LOADING...</span>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
