@@ -5,9 +5,9 @@ const AdmZip = require('adm-zip');
 const iconv = require('iconv-lite');
 
 const KEN_ALL_URL = 'https://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip';
-const DATA_DIR = path.join(__dirname, '..', 'data');
-const ZIP_PATH = path.join(DATA_DIR, 'ken_all.zip');
-const OUTPUT_PATH = path.join(DATA_DIR, 'postal-data.json');
+const PUBLIC_DIR = path.join(__dirname, '..', 'public');
+const ZIP_PATH = path.join(PUBLIC_DIR, 'ken_all.zip');
+const OUTPUT_PATH = path.join(PUBLIC_DIR, 'postal-data.json');
 
 function download(url, dest) {
   return new Promise((resolve, reject) => {
@@ -67,8 +67,8 @@ function parseCSVLine(line) {
 }
 
 async function setup() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(PUBLIC_DIR)) {
+    fs.mkdirSync(PUBLIC_DIR, { recursive: true });
   }
 
   console.log('📥 KEN_ALL データをダウンロード中...');
@@ -94,7 +94,6 @@ async function setup() {
   console.log('🔄 データを解析中...');
   const lines = csvContent.split('\r\n');
   const seen = new Set();
-  const kana = {};
   const grouped = {};
   let count = 0;
 
@@ -107,29 +106,22 @@ async function setup() {
     const pref = cols[6];
     const city = cols[7];
     let town = cols[8];
-    const prefKana = cols[3];
-    const cityKana = cols[4];
-    let townKana = cols[5];
 
     if (town === '以下に掲載がない場合' || town.includes('の次に番地がくる場合')) {
       town = '';
-      townKana = '';
     }
 
     const key = `${zipCode}-${pref}-${city}-${town}`;
     if (seen.has(key)) continue;
     seen.add(key);
 
-    if (!kana[pref]) kana[pref] = prefKana;
-    if (!kana[city]) kana[city] = cityKana;
-
     if (!grouped[pref]) grouped[pref] = {};
     if (!grouped[pref][city]) grouped[pref][city] = [];
-    grouped[pref][city].push([town, townKana, zipCode]);
+    grouped[pref][city].push([town, zipCode]);
     count++;
   }
 
-  const output = { _k: kana, d: grouped };
+  const output = grouped;
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output), 'utf-8');
   fs.unlinkSync(ZIP_PATH);
 
